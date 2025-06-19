@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Guide to AI Video Prompts (EN)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary-color: #4285F4; /* Google Blue */
+            --secondary-color: #34A853; /* Google Green */
+            --tertiary-color: #FBBC05; /* Google Yellow */
+            --danger-color: #EA4335; /* Google Red */
+            --light-gray: #f4f7f9;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #5f6368;
+            --text-color: #202124;
+            --font-family: 'Poppins', sans-serif;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            border-bottom: 2px solid var(--medium-gray);
+            padding-bottom: 1.5rem;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+            max-width: 700px;
+            margin: 0.5rem auto 0;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+        }
+
+        .prompt-builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-gray);
+            font-size: 1rem;
+        }
+
+        label i {
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-family: var(--font-family);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+        }
+
+        /* Tooltip Styles */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark-gray);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            font-weight: 400;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            animation: tooltipFadeIn 0.3s forwards;
+        }
+
+        @keyframes tooltipFadeIn {
+            to { opacity: 1; }
+        }
+
+        .generated-prompt-container {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--primary-color);
+        }
+
+        #generated-prompt {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            min-height: 50px;
+            word-wrap: break-word;
+        }
+
+        /* Analyzer Styles */
+        .analyzer-container {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fff;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+        }
+        .analyzer-container label {
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--medium-gray);
+            border-radius: 20px;
+            height: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            border-radius: 20px;
+            transition: width 0.5s ease-in-out, background-color 0.5s ease;
+            text-align: right;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .tip {
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            padding: 0.5rem;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .button-group {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: var(--font-family);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .btn-copy { background-color: var(--primary-color); color: #fff; }
+        .btn-copy:hover { background-color: #3367D6; transform: translateY(-2px); }
+
+        .btn-example { background-color: var(--secondary-color); color: #fff; }
+        .btn-example:hover { background-color: #2E8C46; transform: translateY(-2px); }
+
+        .btn-mixer { background-color: var(--tertiary-color); color: var(--text-color); }
+        .btn-mixer:hover { background-color: #F9AB00; transform: translateY(-2px); }
+
+        .btn-clear { background-color: var(--danger-color); color: #fff; }
+        .btn-clear:hover { background-color: #C5372C; transform: translateY(-2px); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--medium-gray);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .modal-header h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        .close-btn {
+            font-size: 2rem;
+            font-weight: 300;
+            cursor: pointer;
+            color: var(--dark-gray);
+            line-height: 1;
+        }
+        #modal-prompt {
+            font-style: italic;
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        .analysis-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .analysis-item strong {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-right: 1rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .analysis-item p {
+            margin: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .container { padding: 1.5rem; }
+            header h1 { font-size: 2rem; }
+            .prompt-builder { grid-template-columns: 1fr; }
+            .btn { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Master Guide to AI Video Prompts</h1>
+            <p>Learn to create master-level prompts for video generation AI. Build your ideas, analyze them in real-time, and unleash your creativity!</p>
+        </header>
+
+        <main>
+            <section class="section">
+                <h2>Intelligent Prompt Builder</h2>
+                <div class="prompt-builder">
+                    <div class="form-group">
+                        <label for="subject">🎬 Subject <i>(Who or what?)</i></label>
+                        <input type="text" id="subject" placeholder="e.g., A steam train made of glass">
+                    </div>
+                    <div class="form-group">
+                        <label for="action">🏃 Action <i>(Doing what?)</i></label>
+                        <input type="text" id="action" placeholder="e.g., sailing on a river of molten chocolate">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="context">🌍 Context / Setting <i>(Where and how?)</i></label>
+                        <input type="text" id="context" placeholder="e.g., in a city made of ancient clocks">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="style">🎨 Visual Style</label>
+                        <select id="style">
+                            <option value="">None / Realistic</option>
+                            <option value="cinematic">Cinematic (Film-like visuals)</option>
+                            <option value="in watercolor style">Watercolor (Artistic and soft)</option>
+                            <option value="in anime style">Anime (Japanese animation)</option>
+                            <option value="in 3D animation style">3D Animation (Pixar-like)</option>
+                            <option value="timelapse of">Timelapse (Speed up time)</option>
+                            <option value="in slow motion">Slow Motion (Slow down the action)</option>
+                            <option value="black and white">Black and White (Classic, dramatic)</option>
+                            <option value="in a vintage film style">Vintage Film (Grain, old colors)</option>
+                        </select>
+                    </div>
+                     <div class="form-group">
+                        <label for="camera-angle" data-tooltip="Defines the camera's position and framing.">🎥 Camera Angle</label>
+                        <select id="camera-angle">
+                            <option value="">Default</option>
+                            <option value="an extreme close-up shot of">Extreme Close-up (Tiny details)</option>
+                            <option value="a close-up shot of">Close-up (Focus on emotions)</option>
+                            <option value="a medium shot of">Medium Shot (Waist up)</option>
+                            <option value="a wide shot of">Wide Shot (Show the scenery)</option>
+                            <option value="an aerial view of">Aerial View (From above)</option>
+                            <option value="a drone shot of">Drone Shot (Follows the subject)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="camera-movement" data-tooltip="Adds movement to the camera for more dynamism.">🎞️ Camera Movement</label>
+                        <select id="camera-movement">
+                            <option value="">Static Camera</option>
+                            <option value="panning from left to right">Pan (Moves horizontally)</option>
+                            <option value="with a slow zoom-in">Slow Zoom-in (Moves closer)</option>
+                            <option value="with a slow zoom-out">Slow Zoom-out (Moves away)</option>
+                            <option value="with a dolly shot">Dolly Shot (Smooth, cinematic movement)</option>
+                            <option value="tilting up">Tilt Up (Moves vertically up)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="lighting">💡 Lighting</label>
+                        <input type="text" id="lighting" placeholder="e.g., golden hour, neon, candlelight">
+                    </div>
+                    <div class="form-group">
+                        <label for="quality">✨ Quality Details</label>
+                        <input type="text" id="quality" placeholder="e.g., 4K, photorealistic, film grain">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="negative_prompt">🚫 Negative Prompt <i>(What to avoid?)</i></label>
+                        <input type="text" id="negative_prompt" placeholder="e.g., blurry, text, watermarks">
+                    </div>
+
+                    <div class="generated-prompt-container">
+                        <label><strong>Your Resulting Prompt:</strong></label>
+                        <p id="generated-prompt">Start filling out the fields above...</p>
+                    </div>
+
+                    <div class="analyzer-container">
+                        <label>Prompt Analysis</label>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="prompt-progress-bar"></div>
+                        </div>
+                        <p class="tip" id="analyzer-tip">Fill in the fields to begin the analysis.</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-copy" id="copy-btn">Copy</button>
+                        <button class="btn btn-example" id="example-btn">Analyze Example</button>
+                        <button class="btn btn-mixer" id="mixer-btn">Mix Ideas</button>
+                        <button class="btn btn-clear" id="clear-btn">Clear All</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Inspired by the official Google Cloud Vertex AI documentation. This tool was created for educational purposes.</p>
+            <p>#MadeWithAI #GoogleVeo #PromptEngineering</p>
+            <p id="copyright"></p>
+        </footer>
+    </div>
+
+    <div id="example-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Example Analysis</h3>
+                <span class="close-btn" id="close-modal-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modal-prompt"></p>
+                <div id="modal-analysis"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements Selection
+            const inputs = {
+                subject: document.getElementById('subject'),
+                action: document.getElementById('action'),
+                context: document.getElementById('context'),
+                style: document.getElementById('style'),
+                camera_angle: document.getElementById('camera-angle'),
+                camera_movement: document.getElementById('camera-movement'),
+                lighting: document.getElementById('lighting'),
+                quality: document.getElementById('quality'),
+                negative_prompt: document.getElementById('negative_prompt')
+            };
+            const generatedPromptEl = document.getElementById('generated-prompt');
+            const progressBar = document.getElementById('prompt-progress-bar');
+            const analyzerTip = document.getElementById('analyzer-tip');
+            const copyBtn = document.getElementById('copy-btn');
+            const exampleBtn = document.getElementById('example-btn');
+            const mixerBtn = document.getElementById('mixer-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const modal = document.getElementById('example-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalPromptEl = document.getElementById('modal-prompt');
+            const modalAnalysisEl = document.getElementById('modal-analysis');
+            const copyrightEl = document.getElementById('copyright');
+
+            // --- DATA ---
+            const mixerData = {
+                subjects: ['An elephant with butterfly wings', 'A jet-powered medieval knight', 'A Victorian robot detective', 'An intergalactic sorceress queen', 'An astronaut cat in boots', 'A city made of clocks', 'An octopus chef', 'A ghost librarian', 'A garden statue that has come to life', 'A river of lava', 'A tree that grows crystal fruit', 'A skyscraper made of books', 'An origami dragon', 'A lighthouse in the middle of a desert'],
+                actions: ['skateboarding on a rainbow highway', 'painting a masterpiece with light', 'solving a holographic mystery', 'gardening on asteroids', 'sailing a paper boat in a thunderstorm', 'building a sandcastle that reaches the clouds', 'telling stories to forest animals', 'organizing flying books', 'juggling miniature planets', 'conducting an orchestra of robots', 'breakdancing on a spiderweb'],
+                contexts: ['in an infinite library', 'during a neon meteor shower', 'in an abandoned underwater city', 'at a cyberpunk music festival', 'on a floating castle above the clouds', 'in a space station overgrown with vegetation', 'inside a giant cuckoo clock', 'on a black sand beach with two suns', 'in a forest where the trees are made of crystal', 'in a bustling marketplace on Mars'],
+                styles: ['in anime style', 'cinematic', 'in a vintage film style', 'in 3D animation style', 'in watercolor style', 'black and white', 'in slow motion']
+            };
+
+            const curatedMixes = [
+                { subject: 'A miniature futuristic city inside a snow globe', action: 'with flying cars circulating and tiny people walking', context: 'being gently shaken by a giant hand, causing snow to fall', style: 'cinematic', camera_angle: 'a close-up shot of', camera_movement: 'with a slow zoom-out', lighting: 'soft, magical light from within the globe', quality: 'photorealistic, 8K, highly detailed', negative_prompt: 'blurry hand' },
+                { subject: 'An ancient dragon made of constellations and stardust', action: 'flying majestically through the cosmos', context: 'passing by vibrant nebulas and distant galaxies', style: 'in 3D animation style', camera_angle: 'a wide shot of', camera_movement: 'panning from left to right', lighting: 'ethereal glow from the dragon and nebulas', quality: 'epic quality, vivid colors', negative_prompt: 'planets, asteroids' },
+                { subject: 'An old watchmaker', action: 'putting the final touches on an ornate pocket watch that controls time', context: 'in his dusty, chaotic workshop filled with gears', style: 'in a vintage film style', camera_angle: 'an extreme close-up shot of', camera_movement: 'with a slow zoom-in', lighting: 'warm light from a single bulb, deep shadows', quality: 'sharp focus, film grain, nostalgic', negative_prompt: 'modern, clean' }
+            ];
+
+            const examples = [
+                {
+                    prompt: { subject: 'A lonely lighthouse', action: 'withstanding a violent storm', context: 'on a rocky coast at night', style: 'cinematic', camera_angle: 'a wide shot of', camera_movement: 'with a slow zoom-in', lighting: 'dramatic lightning flashes', quality: 'hyperrealistic, 8K', negative_prompt: 'calm sea' },
+                    analysis: [
+                        { part: 'Subject', text: 'Clearly defines the main focus of the scene.', color: '#4285F4' },
+                        { part: 'Action', text: 'Creates tension and dynamism, telling a story.', color: '#EA4335' },
+                        { part: 'Context', text: 'Establishes the environment and atmosphere.', color: '#34A853' },
+                        { part: 'Camera', text: 'Combining a wide shot with a slow zoom creates a powerful cinematic effect.', color: '#FBBC05' },
+                        { part: 'Details', text: 'Lighting and quality enhance realism and visual impact.', color: '#5f6368' }
+                    ]
+                },
+                {
+                    prompt: { subject: 'A floating flower market', action: 'bustling with vendors and customers', context: 'on a canal in a fantasy city at dawn', style: 'in watercolor style', camera_angle: 'a drone shot of', camera_movement: 'panning from left to right', lighting: 'soft morning light, vibrant colors', quality: 'dreamlike', negative_prompt: '' },
+                    analysis: [
+                        { part: 'Style', text: 'The "watercolor" style sets a unique, artistic visual aesthetic.', color: '#4285F4' },
+                        { part: 'Subject/Action', text: 'The "bustling" description adds complexity and movement to the scene.', color: '#EA4335' },
+                        { part: 'Context', text: 'The fantasy setting gives the AI creative freedom.', color: '#34A853' },
+                        { part: 'Camera', text: 'A drone shot with a pan is perfect for revealing the scale and beauty of the market.', color: '#FBBC05' }
+                    ]
+                },
+                {
+                    prompt: { subject: 'A single drop of water', action: 'falling into a mirrored pond', context: 'in a minimalist environment', style: 'black and white', camera_angle: 'an extreme close-up shot of', camera_movement: '', lighting: 'focused studio light', quality: 'in slow motion, 4K', negative_prompt: 'color' },
+                    analysis: [
+                        { part: 'Minimalism', text: 'The simplicity of the subject and context forces focus on detail and action.', color: '#4285F4' },
+                        { part: 'Technique', text: 'Combining "black and white" with "slow motion" creates immense dramatic impact.', color: '#EA4335' },
+                        { part: 'Camera', text: 'The "extreme close-up" is essential for capturing the texture and impact of the drop.', color: '#FBBC05' },
+                        { part: 'Negative', text: 'Ensures the black and white aesthetic is respected by removing any color.', color: '#5f6368' }
+                    ]
+                },
+                 {
+                    prompt: { subject: 'a cherry blossom flower', action: 'blooming, from bud to full flower', context: 'with a soft-focus Mount Fuji in the background', style: 'timelapse of', camera_angle: 'a close-up shot of', camera_movement: '', lighting: 'transition from morning to afternoon light', quality: 'highly detailed, realistic', negative_prompt: '' },
+                    analysis: [
+                        { part: 'Style', text: '"Timelapse" is the main command that dictates the video\'s format.', color: '#4285F4' },
+                        { part: 'Action', text: 'The action "from bud to full flower" describes the process the timelapse must capture.', color: '#EA4335' },
+                        { part: 'Context', text: 'Adding an iconic background ("Mount Fuji") enriches the scene without overpowering it.', color: '#34A853' },
+                        { part: 'Lighting', text: 'Specifying the light transition makes the timelapse more dynamic and realistic.', color: '#FBBC05' }
+                    ]
+                }
+            ];
+
+            // --- CORE FUNCTIONS ---
+
+            const buildPromptString = (promptData) => {
+                let promptParts = [];
+                const { subject, action, context, style, camera_angle, camera_movement, lighting, quality, negative_prompt } = promptData;
+
+                let cameraPart = '';
+                if (camera_angle && camera_movement) {
+                    cameraPart = `${camera_angle}, ${camera_movement}, of`;
+                } else if (camera_angle) {
+                    cameraPart = camera_angle;
+                } else if (camera_movement) {
+                    cameraPart = camera_movement + ' of';
+                }
+                if (cameraPart) promptParts.push(cameraPart.replace(' of,', ','));
+
+                if (style && style.startsWith('timelapse')) {
+                     promptParts.push(style);
+                     if (subject) promptParts.push(subject);
+                } else {
+                    if (subject) promptParts.push(subject);
+                }
+
+                if (action) promptParts.push(action);
+                if (context) promptParts.push(context);
+                if (lighting) promptParts.push(`with ${lighting} lighting`);
+
+                if (style && !style.startsWith('timelapse')) {
+                    promptParts.push(style);
+                }
+
+                if (quality) promptParts.push(quality);
+
+                let finalPrompt = promptParts.filter(part => part && part.trim() !== '').join(', ');
+
+                if (negative_prompt) {
+                    finalPrompt += ` --no ${negative_prompt.replace(/,--no/g, ',')}`;
+                }
+                return finalPrompt;
+            };
+
+            const analyzePrompt = () => {
+                let score = 0;
+                let tips = [];
+                const weights = { subject: 20, action: 20, context: 20, style: 10, camera_angle: 10, camera_movement: 5, details: 10, negative: 5 };
+
+                if (inputs.subject.value.trim()) {
+                    score += weights.subject;
+                    if (inputs.subject.value.length < 15) tips.push('Try a more descriptive subject.');
+                } else {
+                    tips.push('Add a subject to get started.');
+                }
+
+                if (inputs.action.value.trim()) score += weights.action;
+                if (inputs.context.value.trim()) score += weights.context;
+                if (inputs.style.value) score += weights.style;
+                if (inputs.camera_angle.value) score += weights.camera_angle;
+                if (inputs.camera_movement.value) score += weights.camera_movement;
+                if (inputs.lighting.value.trim() || inputs.quality.value.trim()) score += weights.details;
+                if (inputs.negative_prompt.value.trim()) score += weights.negative;
+
+                progressBar.style.width = score + '%';
+                progressBar.textContent = score > 10 ? `${score}%` : '';
+
+                if (score < 40) progressBar.style.backgroundColor = '#EA4335';
+                else if (score < 75) progressBar.style.backgroundColor = '#FBBC05';
+                else progressBar.style.backgroundColor = '#34A853';
+
+                if (tips.length > 0 && score < 100) {
+                    analyzerTip.textContent = '💡 Tip: ' + tips[0];
+                } else if (score > 0 && score < 100) {
+                    analyzerTip.textContent = '👍 Good start! Add more details to refine your idea.';
+                } else if (score >= 100) {
+                    analyzerTip.textContent = '🏆 Excellent! This is a detailed and well-structured prompt.';
+                } else {
+                    analyzerTip.textContent = 'Fill in the fields to begin the analysis.';
+                }
+            };
+
+            const updatePrompt = () => {
+                const currentValues = {};
+                for (const key in inputs) {
+                    currentValues[key] = inputs[key].value;
+                }
+                const promptText = buildPromptString(currentValues);
+                generatedPromptEl.textContent = promptText || 'Start filling out the fields above...';
+                analyzePrompt();
+            };
+
+            const populateForm = (promptData) => {
+                for (const key in inputs) {
+                    inputs[key].value = promptData[key] || '';
+                }
+                updatePrompt();
+            };
+
+            // --- EVENT LISTENERS ---
+            Object.values(inputs).forEach(input => {
+                input.addEventListener('input', updatePrompt);
+                input.addEventListener('change', updatePrompt);
+            });
+
+            mixerBtn.addEventListener('click', () => {
+                if (Math.random() < 0.25) { // 25% chance of a spectacular mix
+                    const spectacularPrompt = curatedMixes[Math.floor(Math.random() * curatedMixes.length)];
+                    populateForm(spectacularPrompt);
+                } else { // 75% chance of a random mix
+                    const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+                    const randomPrompt = {
+                        subject: getRandom(mixerData.subjects),
+                        action: getRandom(mixerData.actions),
+                        context: getRandom(mixerData.contexts),
+                        style: getRandom(mixerData.styles),
+                        camera_angle: '', camera_movement: '', lighting: '', quality: '', negative_prompt: ''
+                    };
+                    populateForm(randomPrompt);
+                }
+            });
+
+            exampleBtn.addEventListener('click', () => {
+                const example = examples[Math.floor(Math.random() * examples.length)];
+
+                const promptText = buildPromptString(example.prompt);
+                modalPromptEl.textContent = promptText;
+
+                modalAnalysisEl.innerHTML = '';
+                example.analysis.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'analysis-item';
+                    itemEl.innerHTML = `<strong style="background-color:${item.color};">${item.part}</strong><p>${item.text}</p>`;
+                    modalAnalysisEl.appendChild(itemEl);
+});
+
+                modal.classList.add('active');
+            });
+
+            const closeModal = () => modal.classList.remove('active');
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = generatedPromptEl.textContent;
+                if (textToCopy && textToCopy !== 'Start filling out the fields above...') {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+                    });
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                const emptyPrompt = { subject: '', action: '', context: '', style: '', camera_angle: '', camera_movement: '', lighting: '', quality: '', negative_prompt: ''};
+                populateForm(emptyPrompt);
+            });
+
+            const setCopyright = () => {
+                const year = new Date().getFullYear();
+                copyrightEl.textContent = `© ${year} Ricardo Carvalho. All rights reserved.`;
+            };
+
+            // --- INITIALIZATION ---
+            populateForm(examples[0].prompt); // Load the first, most comprehensive example on start
+            setCopyright();
+        });
+    </script>
+</body>
+</html>
